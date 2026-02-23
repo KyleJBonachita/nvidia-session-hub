@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NVIDIA Session Hub</title>
+    <style>
+      :root {
+        --bg: #0a0f14;
+        --surface: #121923;
+        --surface-soft: #0f151e;
+        --surface-elevated: #162132;
+        --text: #e6edf5;
+        --muted: #9aa9ba;
+        --line: #273447;
+        --primary: #76b900;
+        --primary-hover: #639b00;
+        --primary-glow: rgba(118, 185, 0, 0.34);
+        --danger: #ff6b81;
+        --success: #82d969;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Inter, Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at -5% -10%, rgba(118, 185, 0, 0.22) 0%, rgba(118, 185, 0, 0) 60%),
+          radial-gradient(900px 500px at 110% 10%, rgba(88, 146, 0, 0.28) 0%, rgba(88, 146, 0, 0) 55%),
+          radial-gradient(1200px 700px at 50% 120%, rgba(17, 40, 18, 0.6) 0%, rgba(17, 40, 18, 0) 55%),
+          linear-gradient(180deg, #0b1510 0%, #0a0f14 45%, #0a0f14 100%);
+      }
+
+      .container {
+        max-width: 1040px;
+        margin: 28px auto;
+        padding: 0 16px 28px;
+      }
+
+      .card {
+        background: linear-gradient(180deg, rgba(18, 25, 35, 0.96) 0%, rgba(17, 24, 34, 0.96) 100%);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow:
+          0 16px 36px rgba(0, 0, 0, 0.38),
+          inset 0 1px 0 rgba(255, 255, 255, 0.02);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 30px;
+        line-height: 1.1;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.2px;
+      }
+
+      .brand-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 11px;
+        border-radius: 6px;
+        background: linear-gradient(180deg, #7fca00 0%, #76b900 100%);
+        color: #ffffff;
+        font-size: 0.82em;
+        font-weight: 700;
+        letter-spacing: 0.55px;
+        box-shadow: 0 0 0 1px rgba(170, 230, 64, 0.22), 0 8px 20px rgba(86, 154, 0, 0.35);
+      }
+
+      .sub {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 760px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 14px;
+      }
+
+      .field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.35px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .field-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .field-label-row label {
+        margin-bottom: 0;
+      }
+
+      .field-note {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .field-note.info {
+        color: #b8d9ff;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        min-height: 42px;
+        padding: 10px 11px;
+        font-size: 14px;
+        background: rgba(15, 21, 30, 0.92);
+        color: var(--text);
+        transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+      }
+
+      .field input:focus,
+      .field select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-glow);
+        background: #111a25;
+      }
+
+      .field input[readonly] {
+        color: #d6f0b1;
+        border-color: #35502a;
+        background: rgba(30, 44, 22, 0.45);
+      }
+
+      .section {
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+        background: linear-gradient(180deg, rgba(13, 20, 29, 0.96) 0%, rgba(12, 18, 27, 0.96) 100%);
+      }
+
+      .section.disabled {
+        opacity: 0.78;
+      }
+
+      .section-toggle {
+        width: 100%;
+        border: 1px solid #2d4a1d;
+        border-radius: 8px;
+        background: rgba(118, 185, 0, 0.16);
+        color: #cfe8a2;
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 13px;
+      }
+
+      .section-toggle:hover {
+        background: rgba(118, 185, 0, 0.25);
+      }
+
+      .section-title {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+
+      .support-badge {
+        margin-left: 8px;
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        color: #173000;
+        background: #9adf2c;
+        letter-spacing: 0.2px;
+        vertical-align: middle;
+      }
+
+      .support-badge.both {
+        background: #85d616;
+      }
+
+      .support-badge.single {
+        background: #9adf2c;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .li-preview {
+        margin: 0 0 10px;
+        padding: 10px 11px;
+        border-radius: 8px;
+        border: 1px solid #2c425d;
+        background: rgba(17, 27, 40, 0.92);
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .li-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .li-panel {
+        border: 1px solid #2f4259;
+        border-radius: 11px;
+        padding: 12px;
+        background: linear-gradient(180deg, rgba(17, 27, 40, 0.95) 0%, rgba(14, 24, 36, 0.95) 100%);
+      }
+
+      .li-panel .field + .field {
+        margin-top: 10px;
+      }
+
+      .li-panel.li1 {
+        border-top: 2px solid #7fd000;
+      }
+
+      .li-panel.li2 {
+        border-top: 2px solid #6aaa06;
+      }
+
+      .li-heading {
+        margin: 0 0 10px;
+        font-size: 14px;
+        letter-spacing: 0.25px;
+        color: var(--primary);
+      }
+
+      .episodes-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+        gap: 10px;
+      }
+
+      .episode-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-soft);
+        padding: 8px;
+      }
+
+      .episode-title {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .episode-card input,
+      .episode-card select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 7px;
+        font-size: 12px;
+        background: #101722;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      .episode-card select {
+        margin-bottom: 0;
+      }
+
+      .actions {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #2b3f2c;
+        background: rgba(16, 27, 18, 0.65);
+      }
+
+      button {
+        border: none;
+        border-radius: 8px;
+        padding: 11px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #0d1508;
+        background: var(--primary);
+        cursor: pointer;
+        transition: background 0.16s ease, transform 0.12s ease, box-shadow 0.16s ease;
+        box-shadow: 0 10px 20px rgba(76, 134, 0, 0.3);
+      }
+
+      button:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 14px 24px rgba(76, 134, 0, 0.36);
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .message {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 4px 0;
+      }
+
+      .message.error {
+        color: var(--danger);
+      }
+
+      .message.success {
+        color: var(--success);
+      }
+
+      .loading {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .li-columns {
+          grid-template-columns: 1fr;
+        }
+
+        .episodes-grid {
+          grid-template-columns: repeat(3, minmax(150px, 1fr));
+        }
+      }
+
+      @media (max-width: 680px) {
+        .episodes-grid {
+          grid-template-columns: repeat(2, minmax(140px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1><span class="brand-chip">NVIDIA</span> Session Hub</h1>
+        <p class="sub">Unified submission for BOB, Output Tracker, and Meshcat Tracker.</p>
+
+        <form id="session-form">
+          <div class="grid">
+            <div class="field">
+              <label for="operatorName">Operator Name</label>
+              <select id="operatorName" required></select>
+            </div>
+            <div class="field">
+              <label for="email">Email ID</label>
+              <input id="email" type="text" readonly />
+            </div>
+            <div class="field">
+              <label for="teamLeader">Team Leader</label>
+              <select id="teamLeader" required></select>
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label for="taskName">Task Name</label>
+                <span id="taskSupportBadge" class="support-badge hidden"></span>
+              </div>
+              <select id="taskName" required></select>
+            </div>
+            <div class="field">
+              <label for="submissionMode">Submission Type</label>
+              <select id="submissionMode" required></select>
+              <div id="taskSupportHint" class="field-note info">Select a task to see LI support.</div>
+            </div>
+            <div class="field">
+              <label for="workstation">Workstation</label>
+              <select id="workstation" required></select>
+            </div>
+          </div>
+
+          <div id="single-section" class="section">
+            <p class="section-title">Single Language Instruction Submission <span id="singleModeBadge" class="support-badge hidden">LI 1 only</span></p>
+            <p id="singleInstructionPreview" class="li-preview">Select a task and LI to preview instruction.</p>
+            <div class="grid">
+              <div class="field">
+                <label for="singleLi">Language Instruction</label>
+                <select id="singleLi"></select>
+              </div>
+              <div class="field">
+                <label for="singleSessionId">Session ID</label>
+                <input id="singleSessionId" type="text" />
+              </div>
+              <div class="field">
+                <label for="singleOutput">Output</label>
+                <input id="singleOutput" type="number" min="0" step="1" />
+              </div>
+              <div class="field">
+                <label for="singleDurationMinutes">Total Duration (Minutes)</label>
+                <input id="singleDurationMinutes" type="number" min="0.01" step="any" />
+                <div class="field-note">Numbers only (e.g., 22 or 22.3). Do not type unit text like "minutes".</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="both-section" class="section hidden">
+            <p class="section-title">Both LI 1 and LI 2 Submission</p>
+            <div class="li-columns">
+              <div class="li-panel li1">
+                <h3 class="li-heading">LI 1</h3>
+                <p id="li1InstructionPreview" class="li-preview">No instruction available.</p>
+                <div class="field">
+                  <label for="li1SessionId">LI 1 Session ID</label>
+                  <input id="li1SessionId" type="text" />
+                </div>
+                <div class="field">
+                  <label for="li1Output">LI 1 Output</label>
+                  <input id="li1Output" type="number" min="0" step="1" />
+                </div>
+                <div class="field">
+                  <label for="li1DurationMinutes">LI 1 Total Duration (Minutes)</label>
+                  <input id="li1DurationMinutes" type="number" min="0.01" step="any" />
+                  <div class="field-note">Numbers only (e.g., 22 or 22.3).</div>
+                </div>
+              </div>
+              <div class="li-panel li2">
+                <h3 class="li-heading">LI 2</h3>
+                <p id="li2InstructionPreview" class="li-preview">No instruction available.</p>
+                <div class="field">
+                  <label for="li2SessionId">LI 2 Session ID</label>
+                  <input id="li2SessionId" type="text" />
+                </div>
+                <div class="field">
+                  <label for="li2Output">LI 2 Output</label>
+                  <input id="li2Output" type="number" min="0" step="1" />
+                </div>
+                <div class="field">
+                  <label for="li2DurationMinutes">LI 2 Total Duration (Minutes)</label>
+                  <input id="li2DurationMinutes" type="number" min="0.01" step="any" />
+                  <div class="field-note">Numbers only (e.g., 22 or 22.3).</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section disabled">
+            <button id="sessioninputs-toggle" type="button" class="section-toggle">Show optional BOB Episode Seconds/Status</button>
+            <div id="sessioninputs-collapsible" class="hidden">
+              <p class="section-title">Session BOB Episode Seconds/Status (disabled for now, optional)</p>
+              <div id="episodes-body" class="episodes-grid"></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="submit-btn" type="submit">Submit</button>
+            <span id="loading" class="loading"></span>
+            <span id="message" class="message"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const state = {
+        tasks: [],
+        submissionModes: [],
+        episodeCount: 60,
+        operatorEmails: {},
+        defaultEmail: ""
+      };
+
+      const form = document.getElementById("session-form");
+      const operatorNameEl = document.getElementById("operatorName");
+      const emailEl = document.getElementById("email");
+      const teamLeaderEl = document.getElementById("teamLeader");
+      const taskNameEl = document.getElementById("taskName");
+      const taskSupportBadgeEl = document.getElementById("taskSupportBadge");
+      const submissionModeEl = document.getElementById("submissionMode");
+      const taskSupportHintEl = document.getElementById("taskSupportHint");
+      const workstationEl = document.getElementById("workstation");
+
+      const singleSectionEl = document.getElementById("single-section");
+      const bothSectionEl = document.getElementById("both-section");
+      const singleLiEl = document.getElementById("singleLi");
+      const singleSessionIdEl = document.getElementById("singleSessionId");
+      const singleOutputEl = document.getElementById("singleOutput");
+      const singleDurationMinutesEl = document.getElementById("singleDurationMinutes");
+      const li1SessionIdEl = document.getElementById("li1SessionId");
+      const li1OutputEl = document.getElementById("li1Output");
+      const li1DurationMinutesEl = document.getElementById("li1DurationMinutes");
+      const li1InstructionPreviewEl = document.getElementById("li1InstructionPreview");
+      const li2SessionIdEl = document.getElementById("li2SessionId");
+      const li2OutputEl = document.getElementById("li2Output");
+      const li2DurationMinutesEl = document.getElementById("li2DurationMinutes");
+      const li2InstructionPreviewEl = document.getElementById("li2InstructionPreview");
+      const singleInstructionPreviewEl = document.getElementById("singleInstructionPreview");
+      const singleModeBadgeEl = document.getElementById("singleModeBadge");
+      const episodesBodyEl = document.getElementById("episodes-body");
+      const sessionInputsToggleEl = document.getElementById("sessioninputs-toggle");
+      const sessionInputsCollapsibleEl = document.getElementById("sessioninputs-collapsible");
+
+      const messageEl = document.getElementById("message");
+      const loadingEl = document.getElementById("loading");
+      const submitBtnEl = document.getElementById("submit-btn");
+
+      function setFormControlsDisabled(isDisabled) {
+        const controls = form.querySelectorAll("input, select, button");
+        controls.forEach(function (control) {
+          if (control.id === "email") {
+            return;
+          }
+
+          const isOptionalSessionInputControl = control.closest("#sessioninputs-collapsible") !== null;
+          if (isOptionalSessionInputControl) {
+            control.disabled = true;
+            return;
+          }
+
+          control.disabled = isDisabled;
+        });
+
+        if (!isDisabled) {
+          refreshTaskDependentFields();
+          refreshSubmissionModeView();
+          updateInstructionPreviews();
+        }
+      }
+
+      function setLoading(isLoading, text) {
+        setFormControlsDisabled(isLoading);
+        loadingEl.textContent = isLoading ? text : "";
+      }
+
+      function setMessage(type, text) {
+        messageEl.className = "message" + (type ? " " + type : "");
+        messageEl.textContent = text || "";
+      }
+
+      function rowRangeText(resultPart) {
+        const startRow = Number(resultPart && resultPart.startRow);
+        const rowsWritten = Number(resultPart && resultPart.rowsWritten);
+        if (!Number.isFinite(startRow) || !Number.isFinite(rowsWritten) || rowsWritten <= 0) {
+          return "n/a";
+        }
+
+        if (rowsWritten === 1) {
+          return String(startRow);
+        }
+
+        return startRow + "-" + (startRow + rowsWritten - 1);
+      }
+
+      function setFriendlySuccessMessage(result) {
+        const sessionRows = rowRangeText(result.sessionInputs);
+        const outputRows = rowRangeText(result.outputTracker);
+        const meshcatRows = rowRangeText(result.meshcatTracker);
+
+        setMessage(
+          "success",
+          "Submitted successfully. BOB Tracker row(s): " + sessionRows +
+          " | Output Tracker row(s): " + outputRows +
+          " | Meshcat Tracker row(s): " + meshcatRows
+        );
+      }
+
+      function fillSelect(selectEl, values, placeholderText) {
+        selectEl.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = placeholderText || "Select";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        selectEl.appendChild(placeholder);
+
+        values.forEach(function (value) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          selectEl.appendChild(option);
+        });
+      }
+
+      function fillLiSelect(selectEl, liEntries, placeholderText) {
+        selectEl.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = placeholderText || "Select LI";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        selectEl.appendChild(placeholder);
+
+        (liEntries || []).forEach(function (entry) {
+          const option = document.createElement("option");
+          option.value = entry.value;
+          option.textContent = entry.label;
+          selectEl.appendChild(option);
+        });
+      }
+
+      function fillModeSelect(modes) {
+        submissionModeEl.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        submissionModeEl.appendChild(placeholder);
+
+        modes.forEach(function (mode) {
+          const option = document.createElement("option");
+          option.value = mode.value;
+          option.textContent = mode.label;
+          submissionModeEl.appendChild(option);
+        });
+      }
+
+      function getTaskSupportLabel(task) {
+        const liOptions = task && Array.isArray(task.liOptions) ? task.liOptions : [];
+        const supportsBoth = liOptions.indexOf("LI 1") !== -1 && liOptions.indexOf("LI 2") !== -1;
+        return supportsBoth ? "LI 1 & 2" : "LI 1 only";
+      }
+
+      function updateTaskSupportBadge(task) {
+        if (!task) {
+          taskSupportBadgeEl.classList.add("hidden");
+          taskSupportBadgeEl.textContent = "";
+          taskSupportBadgeEl.classList.remove("single", "both");
+          return;
+        }
+
+        const supportLabel = getTaskSupportLabel(task);
+        taskSupportBadgeEl.textContent = supportLabel;
+        taskSupportBadgeEl.classList.remove("hidden", "single", "both");
+        taskSupportBadgeEl.classList.add(supportLabel === "LI 1 & 2" ? "both" : "single");
+      }
+
+      function fillTaskSelect(selectEl, tasks, placeholderText) {
+        selectEl.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = placeholderText || "Select Task";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        selectEl.appendChild(placeholder);
+
+        (tasks || []).forEach(function (task) {
+          const option = document.createElement("option");
+          option.value = task.name;
+          option.textContent = task.name;
+          selectEl.appendChild(option);
+        });
+      }
+
+      function getLiInstruction(task, liKey) {
+        if (!task || !Array.isArray(task.liEntries)) {
+          return "No instruction available.";
+        }
+
+        for (let index = 0; index < task.liEntries.length; index++) {
+          const entry = task.liEntries[index];
+          if (entry.value === liKey) {
+            return entry.instruction || "No instruction available.";
+          }
+        }
+
+        return "No instruction available.";
+      }
+
+      function updateOperatorEmail() {
+        const operatorName = operatorNameEl.value;
+        const mappedEmail = state.operatorEmails[operatorName] || "";
+        emailEl.value = mappedEmail || state.defaultEmail || "";
+      }
+
+      function updateInstructionPreviews() {
+        const task = getSelectedTask();
+        if (!task) {
+          singleInstructionPreviewEl.textContent = "Select a task and LI to preview instruction.";
+          li1InstructionPreviewEl.textContent = "No instruction available.";
+          li2InstructionPreviewEl.textContent = "No instruction available.";
+          return;
+        }
+
+        const singleLi = singleLiEl.value;
+        singleInstructionPreviewEl.textContent = singleLi
+          ? getLiInstruction(task, singleLi)
+          : "Select a Language Instruction to preview.";
+
+        li1InstructionPreviewEl.textContent = getLiInstruction(task, "LI 1");
+        li2InstructionPreviewEl.textContent = getLiInstruction(task, "LI 2");
+      }
+
+      function getSelectedTask() {
+        const selectedTaskName = taskNameEl.value;
+        for (let index = 0; index < state.tasks.length; index++) {
+          const task = state.tasks[index];
+          if (task.name === selectedTaskName) {
+            return task;
+          }
+        }
+        return null;
+      }
+
+      function renderDisabledEpisodeInputs() {
+        const fragment = document.createDocumentFragment();
+
+        for (let episode = 0; episode < state.episodeCount; episode++) {
+          const card = document.createElement("div");
+          card.className = "episode-card";
+
+          const title = document.createElement("div");
+          title.className = "episode-title";
+          title.textContent = "Episode " + episode;
+
+          const secondsInput = document.createElement("input");
+          secondsInput.type = "number";
+          secondsInput.min = "0";
+          secondsInput.step = "any";
+          secondsInput.placeholder = "Seconds";
+          secondsInput.className = "seconds-input";
+          secondsInput.disabled = true;
+
+          const statusSelect = document.createElement("select");
+          statusSelect.className = "status-select";
+          statusSelect.disabled = true;
+
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = "Select";
+          defaultOption.selected = true;
+          statusSelect.appendChild(defaultOption);
+
+          ["Good", "Rejected"].forEach(function (value) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            statusSelect.appendChild(option);
+          });
+
+          card.appendChild(title);
+          card.appendChild(secondsInput);
+          card.appendChild(statusSelect);
+          fragment.appendChild(card);
+        }
+
+        episodesBodyEl.innerHTML = "";
+        episodesBodyEl.appendChild(fragment);
+      }
+
+      function toggleSessionInputsPanel() {
+        const isHidden = sessionInputsCollapsibleEl.classList.contains("hidden");
+        if (isHidden) {
+          sessionInputsCollapsibleEl.classList.remove("hidden");
+          sessionInputsToggleEl.textContent = "Hide optional SessionInputs Episode Seconds/Status";
+          return;
+        }
+
+        sessionInputsCollapsibleEl.classList.add("hidden");
+        sessionInputsToggleEl.textContent = "Show optional SessionInputs Episode Seconds/Status";
+      }
+
+      function refreshTaskDependentFields() {
+        const task = getSelectedTask();
+        if (!task) {
+          fillLiSelect(singleLiEl, [], "Select");
+          submissionModeEl.value = "";
+          submissionModeEl.disabled = true;
+          updateTaskSupportBadge(null);
+          singleSectionEl.classList.remove("hidden");
+          bothSectionEl.classList.add("hidden");
+          taskSupportHintEl.textContent = "Select a task to see LI support.";
+          singleModeBadgeEl.classList.add("hidden");
+          updateInstructionPreviews();
+          return;
+        }
+
+        fillLiSelect(singleLiEl, task.liEntries || [], "Select LI");
+        updateTaskSupportBadge(task);
+
+        const supportsBoth = (task.liOptions || []).indexOf("LI 1") !== -1 && (task.liOptions || []).indexOf("LI 2") !== -1;
+        if (!supportsBoth) {
+          submissionModeEl.value = "single";
+          submissionModeEl.disabled = true;
+          taskSupportHintEl.textContent = "This task supports only LI 1. Submission Type is locked to Single.";
+          singleModeBadgeEl.classList.remove("hidden");
+          if ((task.liEntries || []).length === 1) {
+            singleLiEl.value = task.liEntries[0].value;
+            singleLiEl.disabled = true;
+          } else {
+            singleLiEl.disabled = false;
+          }
+        } else {
+          submissionModeEl.disabled = false;
+          taskSupportHintEl.textContent = "This task supports LI 1 and LI 2. You may submit Single or Both.";
+          singleModeBadgeEl.classList.add("hidden");
+          if (submissionModeEl.value !== "single" && submissionModeEl.value !== "both") {
+            submissionModeEl.value = "single";
+          }
+          singleLiEl.disabled = false;
+        }
+
+        refreshSubmissionModeView();
+        updateInstructionPreviews();
+      }
+
+      function refreshSubmissionModeView() {
+        const mode = submissionModeEl.value;
+        const isBoth = mode === "both";
+
+        singleSectionEl.classList.toggle("hidden", isBoth);
+        bothSectionEl.classList.toggle("hidden", !isBoth);
+      }
+
+      function getPayloadFromForm() {
+        const episodeSeconds = Array.prototype.slice.call(document.querySelectorAll(".seconds-input")).map(function (input) {
+          return input.value;
+        });
+
+        const episodeStatuses = Array.prototype.slice.call(document.querySelectorAll(".status-select")).map(function (select) {
+          return select.value;
+        });
+
+        return {
+          operatorName: operatorNameEl.value,
+          operatorEmail: emailEl.value,
+          teamLeader: teamLeaderEl.value,
+          taskName: taskNameEl.value,
+          submissionMode: submissionModeEl.value,
+          workstation: workstationEl.value,
+          singleLi: singleLiEl.value,
+          singleSessionId: singleSessionIdEl.value,
+          singleOutput: singleOutputEl.value,
+          singleDurationMinutes: singleDurationMinutesEl.value,
+          li1SessionId: li1SessionIdEl.value,
+          li1Output: li1OutputEl.value,
+          li1DurationMinutes: li1DurationMinutesEl.value,
+          li2SessionId: li2SessionIdEl.value,
+          li2Output: li2OutputEl.value,
+          li2DurationMinutes: li2DurationMinutesEl.value,
+          episodeSeconds: episodeSeconds,
+          episodeStatuses: episodeStatuses
+        };
+      }
+
+      function validatePayloadClient(payload) {
+        if (!payload.operatorName || !payload.teamLeader || !payload.taskName || !payload.submissionMode || !payload.workstation) {
+          return "Please complete all required top fields.";
+        }
+
+        if (payload.submissionMode === "single") {
+          if (!payload.singleLi || !payload.singleSessionId) {
+            return "Please complete LI and Session ID for single submission.";
+          }
+
+          const output = Number(payload.singleOutput);
+          if (!Number.isFinite(output) || output < 0) {
+            return "Please enter a valid Output for single submission.";
+          }
+
+          const duration = Number(payload.singleDurationMinutes);
+          if (!Number.isFinite(duration) || duration <= 0) {
+            return "Please enter a valid Total Duration for the selected LI.";
+          }
+
+          return "";
+        }
+
+        if (!payload.li1SessionId || !payload.li2SessionId) {
+          return "Please enter both LI 1 and LI 2 session IDs.";
+        }
+
+        const li1Output = Number(payload.li1Output);
+        const li2Output = Number(payload.li2Output);
+        if (!Number.isFinite(li1Output) || li1Output < 0 || !Number.isFinite(li2Output) || li2Output < 0) {
+          return "Please enter valid outputs for LI 1 and LI 2.";
+        }
+
+        const li1Duration = Number(payload.li1DurationMinutes);
+        const li2Duration = Number(payload.li2DurationMinutes);
+        if (!Number.isFinite(li1Duration) || li1Duration <= 0 || !Number.isFinite(li2Duration) || li2Duration <= 0) {
+          return "Please enter valid Total Duration values for LI 1 and LI 2.";
+        }
+
+        return "";
+      }
+
+      function clearEntryFieldsOnly() {
+        singleSessionIdEl.value = "";
+        singleOutputEl.value = "";
+        singleDurationMinutesEl.value = "";
+
+        li1SessionIdEl.value = "";
+        li1OutputEl.value = "";
+        li1DurationMinutesEl.value = "";
+        li2SessionIdEl.value = "";
+        li2OutputEl.value = "";
+        li2DurationMinutesEl.value = "";
+
+        if (!singleLiEl.disabled) {
+          singleLiEl.selectedIndex = 0;
+        }
+
+        if (!submissionModeEl.disabled) {
+          submissionModeEl.value = "single";
+          refreshSubmissionModeView();
+        }
+      }
+
+      function initializeForm() {
+        setLoading(true, "Loading form...");
+        setMessage("", "");
+
+        google.script.run
+          .withSuccessHandler(function (meta) {
+            state.tasks = Array.isArray(meta.tasks) ? meta.tasks : [];
+            state.submissionModes = Array.isArray(meta.submissionModes) ? meta.submissionModes : [];
+            state.episodeCount = Number(meta.episodeCount) || 60;
+            state.operatorEmails = meta.operatorEmails && typeof meta.operatorEmails === "object" ? meta.operatorEmails : {};
+            state.defaultEmail = meta.email || "";
+
+            fillSelect(operatorNameEl, meta.operators || [], "Select Operator");
+            fillSelect(teamLeaderEl, meta.teamLeaders || [], "Select Team Leader");
+            fillTaskSelect(taskNameEl, state.tasks, "Select Task");
+            fillModeSelect(state.submissionModes);
+            fillSelect(workstationEl, meta.workstations || [], "Select Workstation");
+
+            updateOperatorEmail();
+            renderDisabledEpisodeInputs();
+
+            submissionModeEl.value = "single";
+            submissionModeEl.disabled = true;
+            refreshTaskDependentFields();
+            refreshSubmissionModeView();
+            updateInstructionPreviews();
+
+            setLoading(false, "");
+          })
+          .withFailureHandler(function (error) {
+            setLoading(false, "");
+            setMessage("error", error && error.message ? error.message : String(error));
+          })
+          .getFormMeta();
+      }
+
+      taskNameEl.addEventListener("change", function () {
+        refreshTaskDependentFields();
+      });
+
+      singleLiEl.addEventListener("change", function () {
+        updateInstructionPreviews();
+      });
+
+      operatorNameEl.addEventListener("change", function () {
+        updateOperatorEmail();
+      });
+
+      sessionInputsToggleEl.addEventListener("click", function () {
+        toggleSessionInputsPanel();
+      });
+
+      submissionModeEl.addEventListener("change", function () {
+        refreshSubmissionModeView();
+      });
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        setMessage("", "");
+
+        const payload = getPayloadFromForm();
+        const validationError = validatePayloadClient(payload);
+        if (validationError) {
+          setMessage("error", validationError);
+          return;
+        }
+
+        setLoading(true, "Submitting...");
+
+        google.script.run
+          .withSuccessHandler(function (result) {
+            setLoading(false, "");
+            setFriendlySuccessMessage(result);
+            clearEntryFieldsOnly();
+          })
+          .withFailureHandler(function (error) {
+            setLoading(false, "");
+            setMessage("error", error && error.message ? error.message : String(error));
+          })
+            .submitAllDestinations(payload);
+      });
+
+      initializeForm();
+    </script>
+  </body>
+</html>
