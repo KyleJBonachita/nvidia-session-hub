@@ -60,7 +60,7 @@ Production-focused session intake web app for NVIDIA GR00T Robotics workflows, b
 
 - Portfolio: `https://kylejbonachita.github.io/`
 - Repository: `https://github.com/KyleJBonachita/nvidia-session-hub`
-- Live App URL format: `https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec`
+- Live App URL format: `https://script.google.com/macros/s/AKfycbwEx_PH6KX1UhEY0V1TRg7QFhZmYx3D5_NzyFDzcVUzSXKKg_cAYiAkDrP5CcIM543BzQ/exec`
 
 ## License
 
